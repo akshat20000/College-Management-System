@@ -1,4 +1,5 @@
 const { Course } = require('../models/courses');
+const { User } = require('../models/user');
 const {asyncHandler} = require('../middleware/asyncHandle');
 const {
   NotFoundError,
@@ -10,7 +11,7 @@ const redisClient = require('../utils/redisClient');
 // @route   GET /api/courses
 // @access  Public
 const getCourses = asyncHandler(async (req, res) => {
-  const courses = await Course.find({}).lean();
+  const courses = await Course.find({}).populate('coordinator', 'name email').lean();
   res.status(200).json(courses);
 });
 

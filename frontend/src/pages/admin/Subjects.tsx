@@ -130,7 +130,7 @@ export function AdminSubjects(): JSX.Element {
               <tr key={s.id} className="border-b last:border-0">
                 <td className="px-3 py-2 font-medium">{s.name}</td>
                 <td className="px-3 py-2">{s.code ?? '-'}</td>
-                <td className="px-3 py-2">{courses.find(c => c.id === s.program)?.name ?? '-'}</td>
+                <td className="px-3 py-2">{(s.program as any)?.name ?? courses.find(c => c.id === s.program)?.name ?? '-'}</td>
                 <td className="px-3 py-2">{s.type}</td>
                 <td className="px-3 py-2">{s.credits ?? '-'}</td>
                 <td className="px-3 py-2">

@@ -8,12 +8,14 @@ export interface User {
   assignedClasses: string[]
 }
 
+
+
 export interface Course {
   id: string
   name: string
   description: string
   duration: string
-  coordinator?: string
+  coordinator?: string | { name: string; email: string }
 }
 
 export type SubjectType = 'Theory' | 'Lab' | 'Tutorial' | 'Project'

@@ -19,7 +19,7 @@ const courseSchema = mongoose.Schema(
     //Head of Department 
     coordinator: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'user', // Reference to a User (admin or teacher role)
+      ref: 'User', // Reference to a User (admin or teacher role)
       required: false,
     },
     }
