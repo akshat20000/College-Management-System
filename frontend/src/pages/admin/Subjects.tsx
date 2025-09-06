@@ -15,7 +15,7 @@ export function AdminSubjects(): JSX.Element {
   const [newSubjectName, setNewSubjectName] = useState('');
   const [newSubjectCode, setNewSubjectCode] = useState('');
   const [selectedCourseId, setSelectedCourseId] = useState('');
-  const [newSubjectType, setNewSubjectType] = useState('Core'); // Default to 'Core'
+  const [newSubjectType, setNewSubjectType] = useState('Theory'); // Default to 'Core'
   const [newSubjectCredits, setNewSubjectCredits] = useState('');
 
   // Fetch data on mount
@@ -35,18 +35,18 @@ export function AdminSubjects(): JSX.Element {
       const subjectData = {
         name: newSubjectName,
         code: newSubjectCode,
-        courseId: selectedCourseId, // Use courseId as expected by your slice
+        program: selectedCourseId, // Use courseId as expected by your slice
         type: newSubjectType,
         credits: parseInt(newSubjectCredits, 10),
       };
-
+      
       dispatch(createSubject(subjectData)).then(() => {
         // Reset form and hide it
         setShowCreateForm(false);
         setNewSubjectName('');
         setNewSubjectCode('');
         setSelectedCourseId('');
-        setNewSubjectType('Core');
+        setNewSubjectType('Theory');
         setNewSubjectCredits('');
         // Refetch subjects to update the list
         dispatch(fetchSubjects());
@@ -54,7 +54,9 @@ export function AdminSubjects(): JSX.Element {
     }
   };
 
-
+  //  courses.map((c)=>{
+  //   console.log(c._id)
+  //  })
   return (
     <div className="space-y-6 p-8">
       <div className="flex items-center justify-between">
@@ -86,8 +88,10 @@ export function AdminSubjects(): JSX.Element {
             <label htmlFor="course" className="block text-sm font-medium text-gray-700">Program</label>
             <select id="course" value={selectedCourseId} onChange={(e) => setSelectedCourseId(e.target.value)} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
               <option value="" disabled>Select a program</option>
+              
               {courses.map(course => (
-                <option key={course.id} value={course.id}>{course.name}</option>
+                
+                <option key={course._id} value={course._id}>{course.name}</option>
               ))}
             </select>
           </div>
@@ -95,9 +99,9 @@ export function AdminSubjects(): JSX.Element {
           <div>
             <label htmlFor="subjectType" className="block text-sm font-medium text-gray-700">Type</label>
             <select id="subjectType" value={newSubjectType} onChange={(e) => setNewSubjectType(e.target.value)} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-              <option value="Core">Core</option>
-              <option value="Elective">Elective</option>
+              <option  value="Theory" >Theory</option>
               <option value="Lab">Lab</option>
+              
             </select>
           </div>
 

@@ -25,18 +25,21 @@ export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>('/auth/login', credentials);
     localStorage.setItem('accessToken', response.data.token);
+    localStorage.setItem('user', JSON.stringify(response.data.user));
     return response.data;
   },
 
   async register(data: RegisterData): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>('/auth/register', data);
     localStorage.setItem('accessToken', response.data.token);
+    localStorage.setItem('user', JSON.stringify(response.data.user));
     return response.data;
   },
 
   async logout(): Promise<void> {
     await api.post('/auth/logout');
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('user');
   },
 
   async refreshToken(): Promise<AuthResponse> {
@@ -46,7 +49,9 @@ export const authService = {
   },
 
    async getAllUsers(): Promise<User[]> {
+    console.log("requesting users")
     const response = await api.get<User[]>('/users'); // your backend endpoint to return all users
+   console.log(response)
     return response.data;
   },
 
@@ -60,6 +65,6 @@ export const authService = {
   },
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('accessToken');
+    return !!localStorage.getItem('jwt');
   }
 };

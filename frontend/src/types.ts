@@ -18,7 +18,7 @@ export interface Course {
   coordinator?: string | { name: string; email: string }
 }
 
-export type SubjectType = 'Theory' | 'Lab' | 'Tutorial' | 'Project'
+export type SubjectType = 'Theory' | 'Lab' 
 
 export interface Subject {
   id: string

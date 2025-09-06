@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser, loginUser, logoutUser } = require('../controllers/authControllers');
+const { registerUser, loginUser, logoutUser ,handleRefreshToken} = require('../controllers/authControllers');
 const { rolebasedLimiter} = require('../middleware/rateLimiter');
 
 // @route   POST /api/auth/register
@@ -15,5 +15,7 @@ router.post('/login', rolebasedLimiter,loginUser);
 
 
 router.post('/logout',logoutUser);
+router.post('/refresh',handleRefreshToken)
+
 
 module.exports = router;

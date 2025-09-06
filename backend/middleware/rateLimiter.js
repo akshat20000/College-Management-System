@@ -24,7 +24,7 @@ const strictLimiter = rateLimit({
   }),
 
   windowMs: 15 * 60 * 1000,
-  max:20,
+  max:100,
   message: {
     message: 'Too many login attempts from this IP, please try again after a 15 minute wait'
   },

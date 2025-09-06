@@ -44,10 +44,9 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// NEW: fetch all users (teachers, students, admins)
 export const fetchUsers = createAsyncThunk('user/fetchUsers', async () => {
   const response = await authService.getAllUsers(); // you need to implement this in authService
-  return response; // should return User[]
+  return response; 
 });
 
 const userSlice = createSlice({

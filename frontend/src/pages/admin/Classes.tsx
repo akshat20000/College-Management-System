@@ -16,7 +16,7 @@ interface ScheduleEntry {
   endTime: string;
   room: string;
 }
-
+ 
 export function AdminClasses(): JSX.Element {
   const dispatch = useDispatch<AppDispatch>();
 
@@ -35,7 +35,7 @@ export function AdminClasses(): JSX.Element {
   const [semester, setSemester] = useState<Semester>('Fall');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [schedule, setSchedule] = useState<ScheduleEntry[]>([]); // State now holds an array of schedule objects
+  const [schedule, setSchedule] = useState<ScheduleEntry[]>([]); 
 
   // Fetch data on mount
   useEffect(() => {
@@ -103,6 +103,10 @@ export function AdminClasses(): JSX.Element {
     });
   };
 
+  console.log("users",users)
+  teachers.map((t)=>{
+    console.log("teachers",t)
+  })
   return (
     <div className="p-8 space-y-6">
       <div className="flex items-center justify-between">
@@ -129,6 +133,7 @@ export function AdminClasses(): JSX.Element {
               <label htmlFor="teacher" className="block text-sm font-medium">Teacher</label>
               <select id="teacher" value={selectedTeacher} onChange={e => setSelectedTeacher(e.target.value)} required className="mt-1 block w-full rounded-md shadow-sm">
                 <option value="" disabled>Select Teacher</option>
+                
                 {teachers.map(t => <option key={t.id} value={t.id!}>{t.name}</option>)}
               </select>
             </div>
@@ -214,28 +219,42 @@ export function AdminClasses(): JSX.Element {
             </tr>
           </thead>
           <tbody>
-            {classOfferings.map((cls, index) => (
-              <tr key={cls.id ?? `class-${index}`} className="border-b last:border-0">
-                <td className="px-3 py-2 font-medium">{subjects.find((s) => s.id === cls.subject)?.name ?? '-'}</td>
-                <td className="px-3 py-2">{courses.find((c) => c.id === cls.program)?.name ?? '-'}</td>
-                <td className="px-3 py-2">{cls.sectionName}</td>
-                <td className="px-3 py-2">{users.find((u: User) => u.id === cls.primaryTeacher)?.name ?? '-'}</td>
-                <td className="px-3 py-2">
-                  {cls.schedule.map((s, sIndex) => (
-                    <div key={`sched-${index}-${sIndex}`} className="text-xs text-gray-600">
-                      {s.dayOfWeek} {s.startTime}-{s.endTime} · {s.room}
+            {classOfferings.map((cls, index) => {
+              let programname 
+              courses.map((c)=>{
+                if(c._id === cls.program) 
+                  programname=c.name  
+              })
+              return (
+                <tr key={cls.id ?? `class-${index}`} className="border-b last:border-0">
+                  {/* Render the 'name' property of the looked-up objects */}
+                  <td className="px-3 py-2 font-medium">{cls.subject.name ?? 'N/A'}</td>
+                  <td className="px-3 py-2">{programname}</td>
+                  <td className="px-3 py-2">{cls.sectionName}</td>
+                  <td className="px-3 py-2">{cls.primaryTeacher.name ?? 'N/A'}</td>
+
+                  {/* Schedule column */}
+                  <td className="px-3 py-2">
+                    {cls.schedule.map((s, sIndex) => (
+                      <div key={`sched-${index}-${sIndex}`} className="text-xs text-gray-600">
+                        {s.dayOfWeek} {s.startTime}-{s.endTime} · {s.room}
+                      </div>
+                    ))}
+                  </td>
+
+                  {/* Term column */}
+                  <td className="px-3 py-2">{cls.academicYear} · {cls.semester}</td>
+
+                  {/* Actions column */}
+                  <td className="px-3 py-2">
+                    <div className="flex gap-2">
+                      <button className="rounded-md border px-2 py-1 text-sm hover:bg-gray-50">Edit</button>
+                      <button className="rounded-md border px-2 py-1 text-sm text-red-600 hover:bg-red-50">Delete</button>
                     </div>
-                  ))}
-                </td>
-                <td className="px-3 py-2">{cls.academicYear} · {cls.semester}</td>
-                <td className="px-3 py-2">
-                  <div className="flex gap-2">
-                    <button className="rounded-md border px-2 py-1 text-sm hover:bg-gray-50">Edit</button>
-                    <button className="rounded-md border px-2 py-1 text-sm text-red-600 hover:bg-red-50">Delete</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

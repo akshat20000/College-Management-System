@@ -198,9 +198,37 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   });
 });
 
+const handleRefreshToken = async (req, res) => {
+ const refreshToken = req.cookies.jwt;
+ 
+  
+  if (!refreshToken) {
+    return res.status(401).json({ message: 'Authentication failed. No refresh token.' });
+  }
+  try {
+//const newAccessToken = generateAccessToken(User);
+res.json({
+      token: refreshToken,
+      user: {
+        id: User.id,
+        name: User.name,
+        email: User.email,
+        role: User.role
+      }
+    });
+
+  } catch (error) {
+    // If the refresh token is invalid or expired
+    
+    return res.status(403).json({ message: 'Invalid refresh token.' });
+  }
+};
+
+
 module.exports = {
   registerUser,
   loginUser,
   logoutUser,
   refreshAccessToken,
+  handleRefreshToken
 };

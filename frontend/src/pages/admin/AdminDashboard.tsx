@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import type { RootState, AppDispatch } from '../../store/store'
 import { fetchCourses } from '../../features/course/courseSlice'
 import { fetchSubjects } from '../../features/subject/subjectSlice.ts'
-// import { fetchClasses } from '../../features/class/classSlice.ts'
+import { fetchClasses } from '../../features/class/classSlice.ts'
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate()
@@ -26,7 +26,7 @@ const AdminDashboard: React.FC = () => {
       // Fetch data
       dispatch(fetchCourses())
       dispatch(fetchSubjects())
-      // dispatch(fetchClasses())
+      dispatch(fetchClasses())
     }
   }, [isAuthenticated, user, navigate, dispatch])
 
@@ -47,12 +47,12 @@ const AdminDashboard: React.FC = () => {
 
           {showCreateDropdown && (
             <div className="absolute right-0 mt-2 w-48 bg-white border shadow-lg rounded transition-all duration-300">
-              <button onClick={()=> navigate('/admin/courses')}
-               className="block w-full text-left px-4 py-2 hover:bg-purple-100">New Course</button>
-              <button onClick={()=> navigate('/admin/subjects')}
-              className="block w-full text-left px-4 py-2 hover:bg-purple-100">New Subject</button>
-              <button onClick={()=> navigate('/admin/classes')}
-              className="block w-full text-left px-4 py-2 hover:bg-purple-100">New Class</button>
+              <button onClick={() => navigate('/admin/courses')}
+                className="block w-full text-left px-4 py-2 hover:bg-purple-100">New Course</button>
+              <button onClick={() => navigate('/admin/subjects')}
+                className="block w-full text-left px-4 py-2 hover:bg-purple-100">New Subject</button>
+              <button onClick={() => navigate('/admin/classes')}
+                className="block w-full text-left px-4 py-2 hover:bg-purple-100">New Class</button>
             </div>
           )}
         </div>
@@ -63,21 +63,27 @@ const AdminDashboard: React.FC = () => {
         <div className="p-6 bg-white shadow rounded-lg hover:shadow-lg transition">
           <h2 className="text-xl font-semibold">Courses ({courses.length})</h2>
           <ul className="mt-2 text-gray-600 list-disc list-inside">
-            {courses.map((course: any) => <li key={course.id}>{course.name}</li>)}
+            {courses.map((course: any) => (
+              <li key={course.id}>{course.name}</li>))}
           </ul>
         </div>
 
         <div className="p-6 bg-white shadow rounded-lg hover:shadow-lg transition">
           <h2 className="text-xl font-semibold">Subjects ({subjects.length})</h2>
           <ul className="mt-2 text-gray-600 list-disc list-inside">
-            {subjects.map((subject: any) => <li key={subject.id}>{subject.name}</li>)}
+            {subjects.map((subject: any) => (<li key={subject.id}>{subject.name}</li>))}
           </ul>
         </div>
 
         <div className="p-6 bg-white shadow rounded-lg hover:shadow-lg transition">
           <h2 className="text-xl font-semibold">Classes ({offerings.length})</h2>
           <ul className="mt-2 text-gray-600 list-disc list-inside">
-            {offerings.map((cls: any) => <li key={cls.id}>{cls.name}</li>)}
+            
+            {offerings.map((cls: any) => {
+              const subjectName = subjects.find(s => s._id === cls.subject._id)?.name || 'Unnamed Class';
+              
+              return <li key={cls.id}>{subjectName}</li>;
+            })}
           </ul>
         </div>
       </div>

@@ -1,6 +1,14 @@
 import { api } from './api'
 import type { Subject } from '../types'
 
+interface CreateSubjectData {
+  name: string;
+  code: string;
+  program: string; 
+  type: string;
+  credits: number;
+}
+
 export const subjectService = {
   async getSubjects(): Promise<Subject[]> {
     const response = await api.get<Subject[]>('/subjects')
@@ -12,7 +20,7 @@ export const subjectService = {
     return response.data
   },
 
-  async createSubject(data: { name: string; courseId: string }): Promise<Subject> {
+  async createSubject(data: CreateSubjectData): Promise<Subject> {
     const response = await api.post<Subject>('/subjects', data)
     return response.data
   },

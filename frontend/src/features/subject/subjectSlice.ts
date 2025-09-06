@@ -8,6 +8,14 @@ interface SubjectState {
   error: string | null
 }
 
+interface CreateSubjectData {
+  name: string;
+  code: string;
+  program: string; // This is the program ID
+  type: string;
+  credits: number;
+}
+
 const initialState: SubjectState = {
   subjects: [],
   status: 'idle',
@@ -18,7 +26,7 @@ export const fetchSubjects = createAsyncThunk('subject/fetchSubjects', async () 
   return await subjectService.getSubjects()
 })
 
-export const createSubject = createAsyncThunk('subject/createSubject', async (data: { name: string; courseId: string }) => {
+export const createSubject = createAsyncThunk('subject/createSubject', async (data: CreateSubjectData) => {
   return await subjectService.createSubject(data)
 })
 

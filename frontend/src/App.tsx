@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate, BrowserRouter } from 'react-router-dom'
-import { Provider } from 'react-redux'
-import { store } from './store/store'
+import { Provider , useDispatch, useSelector} from 'react-redux'
+import { store , type RootState, type AppDispatch} from './store/store'
 
 import { StudentDashboard } from './pages/StudentDashboard'
 import { TeacherDashboard } from './pages/TeacherDashboard'
@@ -14,12 +14,31 @@ import { Layout } from './components/Layout'
 import { Signup } from './pages/Signup'
 import { StudentAttendanceRecord } from './pages/StudentAttendanceRecord'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { refreshToken } from './features/Auth/authSlice';
 
-import type { JSX } from 'react'
+import  { type JSX,useEffect } from 'react'
 
-export default function App(): JSX.Element {
-  return (
-    <BrowserRouter>
+
+function AppContent(): JSX.Element {
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading: authLoading, token } = useSelector((state: RootState) => state.auth);
+
+  useEffect(() => {
+    if (token) {
+      dispatch(refreshToken());
+    }
+  }, [dispatch, token]);
+
+  if (authLoading && token) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div>Loading session...</div>
+      </div>
+    );
+  }
+
+return (
+    
       <Provider store={store}>
         <Layout>
           <Routes>
@@ -108,6 +127,17 @@ export default function App(): JSX.Element {
           </Routes>
         </Layout>
       </Provider>
-    </BrowserRouter>
+    
   )
+
+}
+
+export default function App(): JSX.Element {
+  return (
+    <Provider store={store}>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </Provider>
+  );
 }

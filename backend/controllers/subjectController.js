@@ -25,8 +25,9 @@ const getSubjects = asyncHandler(async (req, res) => {
 // @access  Private (Admin only)
 const createSubject = asyncHandler(async (req, res) => {
   const { name, code, description, program, type, credits } = req.body;
-
+   console.log(req.body)
   if (!name || !program || !type || !code) {
+    res.send(error)
     throw new ValidationError('Missing required fields: name, code, program, type');
   }
 
