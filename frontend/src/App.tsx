@@ -56,7 +56,7 @@ return (
               }
             />
             <Route
-              path="/student/attendance"
+              path="/student/attendance/:classId"
               element={
                 <ProtectedRoute allowedRoles={['student']}>
                   <StudentAttendanceRecord />

@@ -47,6 +47,14 @@ export const fetchAttendanceByStudent = createAsyncThunk(
   }
 )
 
+export const fetchAttendanceByStudentAndClass = createAsyncThunk(
+  'attendance/fetchByStudentAndClass',
+  async ({ studentId, classId }: { studentId: string; classId: string }) => {
+    const data = await attendanceService.getAttendanceByStudentAndClass(studentId, classId);
+    return data;
+  }
+);
+
 const attendanceSlice = createSlice({
   name: 'attendance',
   initialState,
@@ -74,19 +82,19 @@ const attendanceSlice = createSlice({
       })
 
 
-       // fetchByStudent
-    .addCase(fetchAttendanceByStudent.pending, (state) => {
-      state.status = 'loading'
-      state.error = null
-    })
-    .addCase(fetchAttendanceByStudent.fulfilled, (state, action: PayloadAction<AttendanceRecord[]>) => {
-      state.status = 'succeeded'
-      state.records = action.payload
-    })
-    .addCase(fetchAttendanceByStudent.rejected, (state, action) => {
-      state.status = 'failed'
-      state.error = action.error.message || 'Failed to fetch student attendance'
-    })
+      // fetchByStudent
+      .addCase(fetchAttendanceByStudent.pending, (state) => {
+        state.status = 'loading'
+        state.error = null
+      })
+      .addCase(fetchAttendanceByStudent.fulfilled, (state, action: PayloadAction<AttendanceRecord[]>) => {
+        state.status = 'succeeded'
+        state.records = action.payload
+      })
+      .addCase(fetchAttendanceByStudent.rejected, (state, action) => {
+        state.status = 'failed'
+        state.error = action.error.message || 'Failed to fetch student attendance'
+      })
 
 
       // markAttendance
@@ -106,6 +114,20 @@ const attendanceSlice = createSlice({
       .addCase(markAttendance.rejected, (state, action) => {
         state.status = 'failed'
         state.error = action.error.message || 'Failed to mark attendance'
+      })
+
+      //fetch by studentid and classid
+      .addCase(fetchAttendanceByStudentAndClass.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(fetchAttendanceByStudentAndClass.fulfilled, (state, action: PayloadAction<AttendanceRecord[]>) => {
+        state.status = 'succeeded';
+        state.records = action.payload;
+      })
+      .addCase(fetchAttendanceByStudentAndClass.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message || 'Failed to fetch student attendance by class';
       })
 
       // updateAttendance

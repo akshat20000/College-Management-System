@@ -1,39 +1,40 @@
 import type { JSX } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState, AppDispatch } from '../store/store'
 import { useEffect } from 'react'
-import { fetchAttendanceByStudent } from '../features/attendance/attendanceSlice'
+import { fetchAttendanceByStudent, fetchAttendanceByStudentAndClass } from '../features/attendance/attendanceSlice'
 import { fetchSubjects } from '../features/subject/subjectSlice'
 import { fetchClasses } from '../features/class/classSlice'
 
 export function StudentAttendanceRecord(): JSX.Element {
+  const { classId } = useParams<{ classId: string }>()
   const dispatch = useDispatch<AppDispatch>()
 
   // Selectors
   const user = useSelector((state: RootState) => state.user.user)
-  const { records,  error } = useSelector((state: RootState) => state.attendance)
+  const { records, status, error } = useSelector((state: RootState) => state.attendance)
   const { subjects } = useSelector((state: RootState) => state.subject)
   const { offerings } = useSelector((state: RootState) => state.class)
 
-  // Load attendance 
+  // Load attendance + related data
   useEffect(() => {
-    if (user?.id) {
-      dispatch(fetchAttendanceByStudent(user.id))
+    if (user?.id && classId) {
+      dispatch(fetchAttendanceByStudentAndClass({ studentId: user.id, classId }))
     }
     if (subjects.length === 0) dispatch(fetchSubjects())
     if (offerings.length === 0) dispatch(fetchClasses())
-  }, [user, dispatch])
+  }, [user?.id, classId, dispatch])
 
-  // find subject 
-  const getSubjectName = (classId: string) => {
+  // Find subject name for this class
+  const getSubjectName = () => {
     const cls = offerings.find(c => c.id === classId)
     if (!cls) return ''
     const subj = subjects.find(s => s.id === cls.subject)
     return subj ? subj.name : ''
   }
 
-  if (status ==='loading') {
+  if (status === 'loading') {
     return <div className="p-8 text-center">Loading attendance...</div>
   }
 
@@ -46,8 +47,8 @@ export function StudentAttendanceRecord(): JSX.Element {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-sm p-8">
           {/* Back Button */}
-          <Link 
-            to="/student" 
+          <Link
+            to="/student"
             className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-6"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,7 +62,12 @@ export function StudentAttendanceRecord(): JSX.Element {
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
               Attendance Record
             </h1>
-            <h2 className="text-xl font-bold text-gray-900">Student: {user?.name}</h2>
+            <h2 className="text-lg font-semibold text-gray-800">
+              Student: {user?.name}
+            </h2>
+            <h3 className="text-md text-gray-600">
+              Subject: {getSubjectName()}
+            </h3>
           </div>
 
           {/* Attendance Table */}
@@ -73,43 +79,45 @@ export function StudentAttendanceRecord(): JSX.Element {
                 <div>STATUS</div>
               </div>
             </div>
-            
+
             <div className="divide-y divide-gray-200">
               {records.map(record => (
                 <div key={record.id} className="px-4 py-3">
                   <div className="grid grid-cols-3 gap-4 items-center">
                     {/* Date */}
                     <div className="text-gray-900">
-                      {new Date(record.date).toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric', 
-                        year: 'numeric' 
+                      {new Date(record.date).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
                       })}
                     </div>
 
                     {/* Subject */}
                     <div className="text-gray-700">
-                      {getSubjectName(record.classId)}
+                      {getSubjectName()}
                     </div>
 
                     {/* Status */}
                     <div>
-                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                        record.status === 'present' 
-                          ? 'bg-green-500 text-white' 
-                          : record.status === 'absent' 
-                            ? 'bg-red-500 text-white' 
-                            : record.status === 'late' 
-                              ? 'bg-yellow-500 text-white' 
-                              : 'bg-blue-500 text-white'
-                      }`}>
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                          record.status === 'present'
+                            ? 'bg-green-500 text-white'
+                            : record.status === 'absent'
+                            ? 'bg-red-500 text-white'
+                            : record.status === 'late'
+                            ? 'bg-yellow-500 text-white'
+                            : 'bg-blue-500 text-white'
+                        }`}
+                      >
                         {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
                       </span>
                     </div>
                   </div>
                 </div>
               ))}
-              
+
               {records.length === 0 && (
                 <div className="px-4 py-8 text-center text-gray-500">
                   No attendance records found

@@ -32,6 +32,11 @@ export const attendanceService = {
     return response.data
   },
 
+   async getAttendanceByStudentAndClass(studentId: string, classId:string): Promise<AttendanceRecord[]> {
+    const response = await api.get<AttendanceRecord[]>(`/attendance/student/${studentId}/class/${classId}`)
+    return response.data
+  },
+
   async updateAttendance(id: string, status: AttendanceStatus): Promise<AttendanceRecord> {
     const response = await api.put(`/attendance/${id}`, { status })
     return response.data.attendance

@@ -86,6 +86,27 @@ const markAttendance = asyncHandler(async (req, res) => {
   });
 });
 
+// GET /attendance/student/:studentId/class/:classId
+const getAttendanceByStudentAndClass = asyncHandler(async (req, res) => {
+  const { studentId, classId } = req.params;
+  console.log(req.params)
+
+  // validate inputs
+  await validateStudentExists(studentId);
+  await validateClassExists(classId);
+
+  const records = await attendance.find({ student: studentId, class: classId })
+    .populate('student', 'name email cmsid')
+    .populate('class', 'sectionName subject')
+    .lean();
+
+  if (!records || records.length === 0) {
+    throw new NotFoundError('No attendance records found for this student in this class');
+  }
+
+  res.status(200).json(records);
+});
+
 // @desc Update attendance
 // @route PUT /api/attendance/:id
 // @access Private (Teacher/Admin)
@@ -122,6 +143,7 @@ module.exports = {
   getAttendanceByStudent,
   getAttendanceByClass,
   markAttendance,
+  getAttendanceByStudentAndClass,
   updateAttendance,
   deleteAttendance
 };
