@@ -27,7 +27,7 @@ function AppContent(): JSX.Element {
     if (token) {
       dispatch(refreshToken());
     }
-  }, [dispatch, token]);
+  }, [dispatch]);
 
   if (authLoading && token) {
     return (
@@ -39,7 +39,7 @@ function AppContent(): JSX.Element {
 
 return (
     
-      <Provider store={store}>
+      
         <Layout>
           <Routes>
             <Route path="/" element={<Navigate to="/signup" />} />
@@ -74,14 +74,21 @@ return (
               }
             />
             <Route
-              path="/teacher/mark"
+              path="/teacher/mark/:subjectId"
               element={
                 <ProtectedRoute allowedRoles={['teacher']}>
                   <MarkAttendance />
                 </ProtectedRoute>
               }
             />
-
+            <Route
+              path="/teacher/class/:classId"
+              element={
+                <ProtectedRoute allowedRoles={['teacher']}>
+                  <MarkAttendance />
+                </ProtectedRoute>
+              }
+            />
             {/* admin routes */}
 
             <Route
@@ -116,17 +123,9 @@ return (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/admin/classes"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminClasses />
-                </ProtectedRoute>
-              }
-            />
           </Routes>
         </Layout>
-      </Provider>
+      
     
   )
 

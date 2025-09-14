@@ -2,15 +2,15 @@ const mongoose = require('mongoose');
 const { Class } = require('../models/class');
 const { Subject } = require('../models/subject');
 const { User } = require('../models/user');
-
-const {asyncHandler} = require('../middleware/asyncHandle');
+const { asyncHandler } = require('../middleware/asyncHandle');
 const {
   ValidationError,
   NotFoundError,
-  ForbiddenError
 } = require('../utils/errorClasses');
 
-// Helper: populate class
+// -------------------- Helpers --------------------
+
+// Populate related fields for class
 const populateClass = (query) => {
   return query
     .populate('subject')
@@ -19,10 +19,14 @@ const populateClass = (query) => {
     .populate('schedule.assignedTeacher', 'name email role');
 };
 
-// Helper: validate user and role
+// Validate user existence & role
 const validateUserAndRole = async (userId, allowedRoles) => {
+  if (!userId || !mongoose.isValidObjectId(userId)) {
+    throw new ValidationError(`Invalid userId: ${userId}`);
+  }
+
   const user = await User.findById(userId);
-  if (!user || !allowedRoles.includes(user.role)) {
+  if (!user || !allowedRoles.includes(user.role.toLowerCase())) {
     throw new ValidationError(
       `User with ID ${userId} does not exist or is not a ${allowedRoles.join(' or ')}`
     );
@@ -30,14 +34,16 @@ const validateUserAndRole = async (userId, allowedRoles) => {
   return user;
 };
 
-// GET all classes with filters
+// -------------------- Controllers --------------------
+
+// GET all classes
 const getClasses = asyncHandler(async (req, res) => {
   const query = { ...req.query };
   const classes = await populateClass(Class.find(query).lean());
   res.status(200).json(classes);
 });
 
-// POST create class
+// POST create new class
 const createClass = asyncHandler(async (req, res) => {
   const {
     subject,
@@ -56,12 +62,19 @@ const createClass = asyncHandler(async (req, res) => {
     throw new ValidationError('Missing required fields.');
   }
 
-  const teacherId = new mongoose.Types.ObjectId(primaryTeacher);
-  await validateUserAndRole(teacherId, ['teacher']);
+  // Validate primary teacher
+  await validateUserAndRole(primaryTeacher, ['teacher']);
+
+  // Validate students
   await Promise.all(students.map(id => validateUserAndRole(id, ['student'])));
 
-  const filteredSchedule = schedule.filter(item => item.assignedTeacher);
-  await Promise.all(filteredSchedule.map(item => validateUserAndRole(item.assignedTeacher, ['teacher'])));
+  // Validate scheduled teachers (only if valid)
+  const filteredSchedule = schedule.filter(
+    item => item.assignedTeacher && mongoose.isValidObjectId(item.assignedTeacher)
+  );
+  await Promise.all(
+    filteredSchedule.map(item => validateUserAndRole(item.assignedTeacher, ['teacher']))
+  );
 
   const newClass = new Class({
     subject,
@@ -94,7 +107,12 @@ const updateClass = asyncHandler(async (req, res) => {
 
   if (primaryTeacher) await validateUserAndRole(primaryTeacher, ['teacher']);
   if (students) await Promise.all(students.map(id => validateUserAndRole(id, ['student'])));
-  if (schedule) await Promise.all(schedule.map(item => validateUserAndRole(item.assignedTeacher, ['teacher'])));
+  if (schedule) {
+    const filteredSchedule = schedule.filter(
+      item => item.assignedTeacher && mongoose.isValidObjectId(item.assignedTeacher)
+    );
+    await Promise.all(filteredSchedule.map(item => validateUserAndRole(item.assignedTeacher, ['teacher'])));
+  }
 
   const updated = await Class.findByIdAndUpdate(req.params.id, req.body, { new: true });
   if (!updated) throw new NotFoundError('Class not found');
@@ -139,6 +157,7 @@ const unenrollStudents = asyncHandler(async (req, res) => {
   res.status(200).json({ message: 'Students unenrolled', class: populated });
 });
 
+// -------------------- Exports --------------------
 module.exports = {
   getClasses,
   createClass,

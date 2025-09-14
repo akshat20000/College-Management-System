@@ -1,4 +1,5 @@
-const { Attendance } = require('../models/attendance');
+const mongoose = require('mongoose')
+const { attendance } = require('../models/attendance');
 const { Class } = require('../models/class');
 const { User } = require('../models/user');
 const {asyncHandler} = require('../middleware/asyncHandle');
@@ -20,14 +21,20 @@ const validateStudentExists = async (studentId) => {
   return student;
 };
 
-// @desc Get attendance records
-// @route GET /api/attendance
+// @desc Get attendance records of a specified student
+// @route GET /api/attendance/student/studentid
 // @access Private (Teacher/Admin)
-const getAttendance = asyncHandler(async (req, res) => {
-  const records = await Attendance.find()
-    .populate('classId')
-    .populate('studentId', 'name email')
+const getAttendanceByStudent = asyncHandler(async (req, res) => {
+  const studentId = req.params.studentId;
+  await validateStudentExists(studentId);
+
+  const records = await attendance.find({ student: studentId })  
+    .populate('student', 'name email cmsid')
     .lean();
+
+  if (!records || records.length === 0) {
+    throw new NotFoundError('No attendance records found for this student');
+  }
 
   res.status(200).json(records);
 });
@@ -36,20 +43,22 @@ const getAttendance = asyncHandler(async (req, res) => {
 // @route GET /api/attendance/class/:classId
 // @access Private (Teacher/Admin)
 const getAttendanceByClass = asyncHandler(async (req, res) => {
-  await validateClassExists(req.params.classId);
+  const classId = new mongoose.Types.ObjectId(req.params.classId);
+  await validateClassExists(classId);
 
-  const records = await Attendance.find({ classId: req.params.classId })
-    .populate('studentId', 'name email')
+  const records = await attendance.find({ class: classId })  
+    .populate('student', 'name email')
     .lean();
 
   res.status(200).json(records);
 });
 
 // @desc Mark attendance
-// @route POST /api/attendance
+// @route POST /api/attendance/:classId
 // @access Private (Teacher/Admin)
 const markAttendance = asyncHandler(async (req, res) => {
-  const { classId, date, records } = req.body;
+  const {  date, records } = req.body;
+  const {classId } = req.params;
 
   if (!classId || !date || !Array.isArray(records) || records.length === 0) {
     throw new ValidationError('classId, date, and attendance records are required');
@@ -61,11 +70,12 @@ const markAttendance = asyncHandler(async (req, res) => {
   await Promise.all(records.map(r => validateStudentExists(r.studentId)));
 
   // Save records
-  const savedRecords = await Attendance.insertMany(
+  const savedRecords = await attendance.insertMany(
     records.map(r => ({
-      classId,
+     class: classId,       
+      student: r.studentId,   
+      markedBy: req.user._id,  
       date,
-      studentId: r.studentId,
       status: r.status
     }))
   );
@@ -84,7 +94,7 @@ const updateAttendance = asyncHandler(async (req, res) => {
 
   if (!status) throw new ValidationError('Status is required to update attendance');
 
-  const updated = await Attendance.findByIdAndUpdate(
+  const updated = await attendance.findByIdAndUpdate(
     req.params.id,
     { status },
     { new: true, runValidators: true }
@@ -102,14 +112,14 @@ const updateAttendance = asyncHandler(async (req, res) => {
 // @route DELETE /api/attendance/:id
 // @access Private (Teacher/Admin)
 const deleteAttendance = asyncHandler(async (req, res) => {
-  const deleted = await Attendance.findByIdAndDelete(req.params.id);
+  const deleted = await attendance.findByIdAndDelete(req.params.id);
   if (!deleted) throw new NotFoundError('Attendance record not found');
 
   res.status(200).json({ message: 'Attendance record deleted successfully' });
 });
 
 module.exports = {
-  getAttendance,
+  getAttendanceByStudent,
   getAttendanceByClass,
   markAttendance,
   updateAttendance,

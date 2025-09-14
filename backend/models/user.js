@@ -2,7 +2,11 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const userSchema = mongoose.Schema(
-  {
+  { 
+    cmsid:{
+    type: String,
+    required:false
+    },
     name: {
       type: String,
       required: [true, 'Please add a name'],
@@ -50,6 +54,32 @@ const userSchema = mongoose.Schema(
     timestamps: true, 
   }
 );
+
+
+const generateCMSID = async () => {
+  const currentYear = new Date().getFullYear();
+  
+  while (true) {
+    const randomFourDigits = Math.floor(1000 + Math.random() * 9000);
+    const potentialCMSID = `${currentYear}${randomFourDigits}`;
+
+    const existingUser = await mongoose.models.User.findOne({ cmsid: potentialCMSID });
+    
+    if (!existingUser) {
+      return potentialCMSID;
+    }
+    
+  }
+};
+userSchema.pre('save', async function (next) {
+  // 'this' refers to the document being saved
+  if (this.isNew && !this.cmsid) {
+    this.cmsid = await generateCMSID();
+  }
+  next(); 
+});
+
+
 
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();

@@ -1,5 +1,6 @@
 import { api } from './api'
 import type { AttendanceRecord, AttendanceStatus } from '../types'
+import { MarkAttendance } from '../pages/MarkAttendance'
 
 export interface MarkAttendanceData {
   classId: string
@@ -27,7 +28,7 @@ export const attendanceService = {
   },
 
   async markAttendance(data: MarkAttendanceData): Promise<{ message: string; attendance: AttendanceRecord[] }> {
-    const response = await api.post('/attendance', data)
+    const response = await api.post(`/attendance/${data.classId}`, data)
     return response.data
   },
 

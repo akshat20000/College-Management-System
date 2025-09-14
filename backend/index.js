@@ -33,6 +33,7 @@ app.get('/', (req, res) => {
 });
 
 // --- API Routes ---
+app.use('/api/users',authRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/subjects', subjectRoutes);

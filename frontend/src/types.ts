@@ -2,6 +2,7 @@ export type Role = 'admin' | 'teacher' | 'student'
 
 export interface User {
   id: string
+  cmsid: String
   name: string
   email: string
   role: Role

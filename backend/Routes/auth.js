@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser, loginUser, logoutUser ,handleRefreshToken} = require('../controllers/authControllers');
+const { registerUser, loginUser, logoutUser ,handleRefreshToken, getUserByCmsid} = require('../controllers/authControllers');
 const { rolebasedLimiter} = require('../middleware/rateLimiter');
 
 // @route   POST /api/auth/register
@@ -12,10 +12,9 @@ router.post('/register',registerUser);
 // @desc    Authenticate user & get token
 // @access  Public
 router.post('/login', rolebasedLimiter,loginUser);
-
-
 router.post('/logout',logoutUser);
 router.post('/refresh',handleRefreshToken)
+router.get('/:role/:cmsid', getUserByCmsid);
 
 
 module.exports = router;

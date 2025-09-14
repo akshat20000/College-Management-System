@@ -11,7 +11,7 @@ const {
 const redisClient = require('../utils/redisClient');
 
 const generateAccessToken = (user) => {
-  return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+  return jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
     expiresIn: '1h',
   });
 };
@@ -65,7 +65,8 @@ const registerUser = asyncHandler(async (req, res) => {
   res.status(201).json({
     message: 'User registered successfully',
     user: {
-      id: newUser._id,
+      id: newUser.id,
+      cmsid:newUser.cmsid,
       name: newUser.name,
       email: newUser.email,
       role: newUser.role,
@@ -103,7 +104,8 @@ const loginUser = asyncHandler(async (req, res) => {
   res.status(200).json({
     message: 'Logged in successfully',
     user: {
-      id: user._id,
+      id: user.id,
+      cmsid:user.cmsid,
       name: user.name,
       email: user.email,
       role: user.role,
@@ -164,7 +166,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
     user = await User.findOne({ refreshToken });
     if (user) {
-      userId = user._id.toString();
+      userId = user.id.toString();
     }
   }
 
@@ -190,7 +192,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     message: 'Token refreshed successfully',
     accessToken: newAccessToken,
     user: {
-      id: user._id,
+      id: user.id,
+      cmsid:user.cmsid,
       name: user.name,
       email: user.email,
       role: user.role,
@@ -211,6 +214,7 @@ res.json({
       token: refreshToken,
       user: {
         id: User.id,
+        cmsid:User.cmsid,
         name: User.name,
         email: User.email,
         role: User.role
@@ -225,7 +229,20 @@ res.json({
 };
 
 
+// GET /api/users/:role/:cmsid
+const getUserByCmsid = asyncHandler(async (req, res) => {
+  const { cmsid, role } = req.params;
+  const user = await User.findOne({ cmsid, role })
+    .select('_id cmsid name email role'); // return minimal public info
+  if (user) {
+    return res.status(200).json({ found: true, user });
+  }
+  console.log(user)
+  res.status(404).json({ found: false });
+});
+
 module.exports = {
+  getUserByCmsid,
   registerUser,
   loginUser,
   logoutUser,

@@ -48,12 +48,26 @@ export const authService = {
     return response.data;
   },
 
-   async getAllUsers(): Promise<User[]> {
+  async getAllUsers(): Promise<User[]> {
     console.log("requesting users")
-    const response = await api.get<User[]>('/users'); // your backend endpoint to return all users
-   console.log(response)
+    const response = await api.get<User[]>('/users'); 
+    console.log(response)
     return response.data;
   },
+
+  async checkUserByCmsid(cmsid: string, role: string): Promise<{ found: boolean, user?: User }> {
+    
+    const response = await api.get(`/users/${role}/${cmsid}`);
+    return response.data;
+  },
+
+  // async checkTeacherByCmsid(cmsid: string) {
+  //   return this.checkUserByCmsid(cmsid, 'teacher');
+  // },
+
+  // async checkStudentByCmsid(cmsid: string) {
+  //   return this.checkUserByCmsid(cmsid, 'student');
+  // },
 
   getCurrentUser(): User | null {
     const userStr = localStorage.getItem('user');

@@ -28,6 +28,22 @@ export const createClass = createAsyncThunk(
   }
 )
 
+export const updateClass = createAsyncThunk(
+  'class/updataclass',
+  async ({ id, data }: { id: string; data: Partial<ClassOffering> }) => {
+    const response = await classService.updateClass(id, data)
+    return response
+  }
+)
+
+export const deleteClass = createAsyncThunk(
+  'class/deleteClass',
+  async (id: string) => {
+    await classService.deleteClass(id)
+    return id
+  }
+)
+
 interface ClassState {
   offerings: ClassOffering[]
   selectedClass: ClassOffering | null
@@ -83,6 +99,20 @@ const classSlice = createSlice({
       .addCase(createClass.rejected, (state, action) => {
         state.status = 'failed'
         state.error = action.error.message || 'Failed to create class'
+      })
+
+
+      // Update class
+      .addCase(updateClass.fulfilled, (state, action) => {
+        const index = state.offerings.findIndex(cls => cls._id === action.payload._id)
+        if (index !== -1) {
+          state.offerings[index] = action.payload
+        }
+      })
+
+      // Delete class
+      .addCase(deleteClass.fulfilled, (state, action) => {
+        state.offerings = state.offerings.filter(cls => cls._id !== action.payload)
       })
   },
 })

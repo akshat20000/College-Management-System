@@ -1,4 +1,4 @@
-import { useEffect , type JSX} from 'react'
+import { useEffect, type JSX } from 'react'
 import { Link } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState, AppDispatch } from '../store/store'
@@ -22,6 +22,12 @@ export function TeacherDashboard(): JSX.Element {
     return <div className="p-8 text-center">Loading...</div>
   }
 
+  const teacherClasses = classesState.filter((cls: ClassOffering) => {
+    // console.log(cls)
+    return cls.primaryTeacher === user?.id || 
+           (typeof cls.primaryTeacher === 'object' && cls.primaryTeacher?._id === user?.id)
+  })
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -31,24 +37,30 @@ export function TeacherDashboard(): JSX.Element {
           <h2 className="text-xl font-bold text-gray-900 mb-6">My Classes</h2>
 
           <div className="grid gap-4">
-            {classesState.map((cls: ClassOffering) => {
+           
+            {teacherClasses.map((cls: ClassOffering) => {
               // safely get subject
               const subj: Subject | undefined = subjectsState.find(
-                (s: Subject) => s.id === cls.subject
+                
+                (s: Subject) => s._id === cls.subject._id,
+                
               )
+              
               const studentCount = cls.students.length
-
               return (
                 <div key={cls.id ?? cls.subject + cls.academicYear} className="bg-gray-50 rounded-lg p-4">
                   <div className="font-bold text-gray-900 text-lg">
                     {subj?.name ?? cls.subject} - {cls.academicYear}
+                  </div>
+                  <div className="font-bold  text-sm text-gray-900 mt-1">
+                    Section -  {cls.sectionName}
                   </div>
                   <div className="text-sm text-gray-600 mt-1">
                     {studentCount} students
                   </div>
                   <div className="mt-4">
                     <Link
-                      to={`/teacher/mark/${cls.id}`}
+                      to={`/teacher/class/${cls?._id}`}
                       className="inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md transition duration-200"
                     >
                       Mark Attendance
@@ -58,7 +70,7 @@ export function TeacherDashboard(): JSX.Element {
               )
             })}
 
-            {classesState.length === 0 && (
+            {teacherClasses.length === 0 && (
               <div className="text-center text-gray-500 py-8">
                 No classes assigned yet
               </div>

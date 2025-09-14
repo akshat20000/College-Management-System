@@ -27,6 +27,15 @@ export const classService = {
     return response.data
   },
 
+  async updateClass(id:string,data:Partial<ClassOffering>){
+    const response = await api.put<ClassOffering>(`/classes/${id}`,data)
+    return response.data;
+  },
+
+   async deleteClass(id: string): Promise<void> {
+    await api.delete(`/classes/${id}`)
+  }
+
   
 }
 

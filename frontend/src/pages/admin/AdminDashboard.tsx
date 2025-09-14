@@ -18,7 +18,6 @@ const AdminDashboard: React.FC = () => {
 
   // Create dropdown state
   const [showCreateDropdown, setShowCreateDropdown] = useState(false)
-
   useEffect(() => {
     if (!isAuthenticated || user?.role !== 'admin') {
       navigate('/login', { replace: true })

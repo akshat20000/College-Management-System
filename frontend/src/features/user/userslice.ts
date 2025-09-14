@@ -4,6 +4,7 @@ import type { LoginCredentials, RegisterData, AuthResponse } from '../../service
 
 export interface User {
   id: string | null;
+  cmsid: String;
   name: string | null;
   email: string | null;
   role: 'admin' | 'teacher' | 'student' | null;
@@ -13,7 +14,7 @@ export interface User {
 
 interface UserState {
   user: User | null;
-  users: User[];          // <-- store all users
+  users: User[];          
   isAuthenticated: boolean;
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;

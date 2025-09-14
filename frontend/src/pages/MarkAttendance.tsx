@@ -2,27 +2,27 @@ import { useMemo } from 'react'
 import type { JSX } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState, AppDispatch } from '../store/store'
-import { Link } from 'react-router-dom'
+import { Link, useParams  } from 'react-router-dom'
 import { markAttendance } from '../features/attendance/attendanceSlice'
 import type { AttendanceStatus } from '../types'
 
 export function MarkAttendance(): JSX.Element {
   const dispatch = useDispatch<AppDispatch>()
 
-  const classId = 'c1'
+  const { classId } = useParams<{ classId: string }>()
   const { offerings: classOfferings } = useSelector((state: RootState) => state.class)
   const { subjects } = useSelector((state: RootState) => state.subject)
   const { users } = useSelector((state: RootState) => state.user)
   const { records } = useSelector((state: RootState) => state.attendance)
+  const cls = classOfferings.find(c => c._id === classId)
 
-  const cls = classOfferings.find(c => c.id === classId)
   if (!cls) return <p>Class not found</p>
 
   // Find the subject for this class
-  const subject = subjects.find(s => s.id === cls.subject)
+  const subject = subjects.find(s => s._id === cls.subject._id)
   const subjectName = subject?.name ?? 'Unknown Subject'
 
-  const students = users.filter(u => u.id && cls.students.includes(u.id))
+  const students = cls.students ?? []
 
   const today = new Date().toISOString().slice(0, 10)
 
@@ -33,7 +33,7 @@ export function MarkAttendance(): JSX.Element {
           .filter(r => r.classId === classId && r.date.startsWith(today))
           .map(r => [r.studentId, r.status as AttendanceStatus])
       ),
-    [records]
+    [records, classId, today]
   )
 
   const setStatus = (studentId: string, status: AttendanceStatus) => {
@@ -71,7 +71,7 @@ export function MarkAttendance(): JSX.Element {
           <div className="space-y-6 mt-4">
             {students.map(s => (
               <div
-                key={s.id}
+                key={s._id}   
                 className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
               >
                 <div>{s.name ?? 'Unnamed Student'}</div>
@@ -79,9 +79,9 @@ export function MarkAttendance(): JSX.Element {
                   {(['present', 'absent', 'late'] as AttendanceStatus[]).map(st => (
                     <button
                       key={st}
-                      onClick={() => setStatus(s.id!, st)}
+                      onClick={() => setStatus(s._id, st)}   
                       className={`px-4 py-2 rounded-full text-sm ${
-                        currentMap.get(s.id!) === st
+                        currentMap.get(s._id) === st   
                           ? st === 'present'
                             ? 'bg-green-500 text-white'
                             : st === 'absent'
