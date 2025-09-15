@@ -89,7 +89,6 @@ const markAttendance = asyncHandler(async (req, res) => {
 // GET /attendance/student/:studentId/class/:classId
 const getAttendanceByStudentAndClass = asyncHandler(async (req, res) => {
   const { studentId, classId } = req.params;
-  console.log(req.params)
 
   // validate inputs
   await validateStudentExists(studentId);

@@ -28,9 +28,9 @@ export function StudentAttendanceRecord(): JSX.Element {
 
   // Find subject name for this class
   const getSubjectName = () => {
-    const cls = offerings.find(c => c.id === classId)
+    const cls = offerings.find(c => c._id === classId)
     if (!cls) return ''
-    const subj = subjects.find(s => s.id === cls.subject)
+    const subj = subjects.find(s => s._id === cls.subject._id)
     return subj ? subj.name : ''
   }
 
@@ -39,8 +39,25 @@ export function StudentAttendanceRecord(): JSX.Element {
   }
 
   if (error) {
-    return <div className="p-8 text-center text-red-500">Error: {error}</div>
-  }
+    return (
+  <>
+    <Link
+      to="/student"
+      className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-6"
+    >
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+      </svg>
+      Back to Dashboard
+    </Link>
+
+    <div className="p-8 text-center text-red-500">
+      No Attendance Marked for this Class
+    </div>
+  </>
+)}
+
+  
 
   return (
     <div className="min-h-screen bg-gray-50">
